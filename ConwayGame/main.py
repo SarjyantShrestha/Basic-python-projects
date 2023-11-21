@@ -17,6 +17,10 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 
 
+def filter_live_cells(position, neighbors):
+    return list(filter(lambda x: x in position, neighbors))
+
+
 def generate_tiles(num):
     return set([
         (random.randrange(0, GRID_WIDTH), (random.randrange(0, GRID_HEIGHT))) for _ in range(num)
@@ -41,16 +45,52 @@ def draw_grid(positions):
 
 
 def adjust_grid(positions):
-    all_neighbor = set()
+    all_neighbors = set()
     new_positions = set()
-    
+
     for position in positions:
-        neighbor = get_neighbor()
+        # get all neighbors (live and dead)
+        neighbors = get_neighbor(position)
+        all_neighbors.update(neighbors)
+
+        # get live neighbors
+        neighbors = filter_live_cells(position, neighbors)
+
+        # if the cell has 2 or 3 neighbors then keep the cell
+        if len(neighbors) in [2, 3]:
+            new_positions.add(position)
+
+    for position in all_neighbors:
+        neighbors = get_neighbor(position)  # neighbors of the neighbors
+        neighbors = filter_live_cells(position, neighbors)
+
+        # if the cell has 3 neighbors then create cell
+        if len(neighbors) == 3:
+            new_positions.add(position)
+
+    return new_positions
+
+
+def get_neighbor(position):
+    x, y = position
+    neighbors = []
+    for dx in [-1, 0, 1]:
+        if x + dx < 0 or x + dx > GRID_WIDTH:
+            continue
+        for dy in [-1, 0, 1]:
+            if y + dy < 0 or y + dy > GRID_HEIGHT:
+                continue
+            if dx == 0 and dy == 0:
+                continue
+
+            neighbors.append(x + dx, y + dy)
 
 
 def main():
     running = True
     playing = False
+    count = 0
+    update_freq = 120
 
     positions = set()
 
