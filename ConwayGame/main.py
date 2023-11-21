@@ -40,12 +40,19 @@ def draw_grid(positions):
                          (col*TILE_SIZE, HEIGHT))
 
 
+def adjust_grid(positions):
+    all_neighbor = set()
+    new_positions = set()
+    
+    for position in positions:
+        neighbor = get_neighbor()
+
+
 def main():
     running = True
     playing = False
 
     positions = set()
-    positions.add((10, 10))
 
     while running:
         for event in pygame.event.get():
@@ -72,7 +79,8 @@ def main():
 
                 if event.key == pygame.K_g:
                     positions = generate_tiles(
-                        random.randrange(2, 10)*TILE_SIZE)
+                        random.randrange(2, 10)*TILE_SIZE
+                    )
 
         screen.fill("grey")
 
